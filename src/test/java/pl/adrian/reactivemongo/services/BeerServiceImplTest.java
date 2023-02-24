@@ -7,12 +7,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import pl.adrian.reactivemongo.domain.Beer;
 import pl.adrian.reactivemongo.mappers.BeerMapper;
 import pl.adrian.reactivemongo.model.BeerDTO;
+import pl.adrian.reactivemongo.repositories.BeerRepository;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
 class BeerServiceImplTest {
@@ -22,6 +24,9 @@ class BeerServiceImplTest {
 
     @Autowired
     BeerMapper beerMapper;
+
+    @Autowired
+    BeerRepository beerRepository;
 
     BeerDTO beerDTO;
 
@@ -42,6 +47,16 @@ class BeerServiceImplTest {
         });
 
         await().untilTrue(atomicBoolean);
+    }
+
+    @Test
+    void findFirstByBeerName() {
+        Beer beer = getTestBeer();
+        beerRepository.save(beer);
+
+        Mono<BeerDTO> foundBeer = beerService.findFirstByBeerName(beer.getBeerName());
+
+        assertNotNull(foundBeer.block());
     }
 
     public static Beer getTestBeer() {
