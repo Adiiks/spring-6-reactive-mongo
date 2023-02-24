@@ -59,6 +59,22 @@ class BeerServiceImplTest {
         assertNotNull(foundBeer.block());
     }
 
+    @Test
+    void findAllByBeerStyle() {
+        Beer beer = getTestBeer();
+        beerRepository.save(beer);
+
+        AtomicBoolean atomicBoolean = new AtomicBoolean(false);
+
+        beerService.findAllByBeerStyle(beer.getBeerStyle())
+                .subscribe(dto -> {
+                    System.out.println(dto.toString());
+                    atomicBoolean.set(true);
+                });
+
+        await().untilTrue(atomicBoolean);
+    }
+
     public static Beer getTestBeer() {
         return Beer.builder()
                 .beerName("Space Dust")
