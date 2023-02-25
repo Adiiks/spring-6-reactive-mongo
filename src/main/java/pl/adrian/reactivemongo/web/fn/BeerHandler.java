@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.util.UriComponentsBuilder;
 import pl.adrian.reactivemongo.model.BeerDTO;
 import pl.adrian.reactivemongo.services.BeerService;
 import reactor.core.publisher.Mono;
@@ -23,5 +24,14 @@ public class BeerHandler {
         return ServerResponse.ok()
                 .body(beerService.getBeerById(request.pathVariable("beerId")),
                         BeerDTO.class);
+    }
+
+    public Mono<ServerResponse> createNewBeer(ServerRequest request) {
+        return beerService.saveBeer(request.bodyToMono(BeerDTO.class))
+                .flatMap(beerDTO -> ServerResponse
+                        .created(UriComponentsBuilder
+                                .fromPath(BeerRouterConfig.BEER_PATH_ID)
+                                .build(beerDTO.getId()))
+                        .build());
     }
 }
