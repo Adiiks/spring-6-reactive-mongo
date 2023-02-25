@@ -13,6 +13,7 @@ import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.util.UriComponentsBuilder;
 import pl.adrian.reactivemongo.model.BeerDTO;
 import pl.adrian.reactivemongo.services.BeerService;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
@@ -23,8 +24,16 @@ public class BeerHandler {
     private final Validator validator;
 
     public Mono<ServerResponse> listBeers(ServerRequest request) {
+        Flux<BeerDTO> beerDTOFlux;
+
+        if (request.queryParam("beerStyle").isPresent()) {
+            beerDTOFlux = beerService.findAllByBeerStyle(request.queryParam("beerStyle").get());
+        } else {
+            beerDTOFlux = beerService.listBeers();
+        }
+
         return ServerResponse.ok()
-                .body(beerService.listBeers(), BeerDTO.class);
+                .body(beerDTOFlux, BeerDTO.class);
     }
 
     public Mono<ServerResponse> getBeerById(ServerRequest request) {
